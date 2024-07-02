@@ -22,6 +22,8 @@ async def profile(message: types.Message):
 📆 Дата регистрации: {user['registration_date'].strftime('%d-%m-%Y %H:%M')}
 
 💸 Баланс: {user['balance']} 💎 Tokens
+👥 Приглашенные пользователи: {user['refs']}
+💰 Заработано за рефералов: {user['refs_bonus']} 💎
 
 ⚜️ Premium подписка: {'✅ Активна' if user['subscription_status'] == 'premium' else '❌ Не активна'}
 👁‍🗨 Telegram Premium: {'✅ Активен' if user['is_premium'] == True else '❌ Не активен'}

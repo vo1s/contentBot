@@ -27,7 +27,7 @@ async def add_user(user_data):
 
 
 # Пример асинхронной функции для получения пользователя по ID
-async def get_user_by_id(user_id):
+async def get_user_by_id(user_id: int):
     users_collection = get_users_collection()
     return await users_collection.find_one({"_id": user_id})
 
