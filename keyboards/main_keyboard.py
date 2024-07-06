@@ -16,6 +16,19 @@ main_keyboard = ReplyKeyboardMarkup(keyboard=[
     ],
 ], resize_keyboard=True, one_time_keyboard=False, selective=True)
 
+earn_keyboard = ReplyKeyboardMarkup(keyboard=[
+    [
+        KeyboardButton(text="👥 Пригласить друзей"),
+        KeyboardButton(text="🎁 Получить бонус"),
+    ],
+    [
+        KeyboardButton(text="🎰 Казино"),
+        KeyboardButton(text="➕ Предложить материал"),
+    ],
+    [
+        KeyboardButton(text="🔝 Главное меню")
+    ],
+], resize_keyboard=True, one_time_keyboard=False, selective=True)
 
 class Pagination(CallbackData, prefix="pag"):
     action: str

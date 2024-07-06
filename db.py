@@ -32,7 +32,6 @@ async def get_user_by_id(user_id: int):
     return await users_collection.find_one({"_id": user_id})
 
 
-# Пример асинхронной функции для обновления подписочного статуса пользователя
 async def update_subscription_status(user_id, status):
     users_collection = get_users_collection()
     await users_collection.update_one({"_id": user_id}, {"$set": {"subscription_status": status}})

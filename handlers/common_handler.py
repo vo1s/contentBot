@@ -6,7 +6,7 @@ from aiogram.filters import CommandStart, CommandObject
 from aiogram.types import Message
 
 from db import add_user, get_user_by_id, get_users_collection
-from keyboards.main_keyboard import main_keyboard
+from keyboards.main_keyboard import *
 
 router = Router()
 
@@ -68,3 +68,8 @@ async def command_start_handler(message: types.Message) -> None:
     await add_user(user_data)
 
     await message.answer(f"Добро пожаловать в бота!", reply_markup=main_keyboard)
+
+
+@router.message(F.text == "🔝 Главное меню")
+async def earn(message: types.Message):
+    await message.answer("🔝 Главное меню", reply_markup=main_keyboard)
