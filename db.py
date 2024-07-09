@@ -1,3 +1,5 @@
+from typing import Literal
+
 import pymongo
 from pymongo import MongoClient
 from config import config
@@ -35,3 +37,19 @@ async def get_user_by_id(user_id: int):
 async def update_subscription_status(user_id, status):
     users_collection = get_users_collection()
     await users_collection.update_one({"_id": user_id}, {"$set": {"subscription_status": status}})
+
+
+async def manage_balance(user_id: int, balance: int, operation: Literal["add", "subtract"]):
+    users_collection = get_users_collection()
+    user = await get_user_by_id(user_id)
+    if not user:
+        raise ValueError("User not found")
+
+    new_balance = user['balance'] - balance if operation == "subtract" else user['balance'] + balance
+
+    await users_collection.update_one(
+        {"_id": user_id},
+        {"$set": {"balance": new_balance}}
+    )
+
+    return new_balance

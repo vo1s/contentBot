@@ -19,7 +19,6 @@ bot = Bot(token=config.bot_token.get_secret_value(), default=DefaultBotPropertie
 )
 dp = Dispatcher()
 
-
 async def main():
     # dp.message.middleware(AntiFloodMiddleware())
     #dp.message.middleware(CheckSubscription())

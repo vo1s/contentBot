@@ -2,7 +2,8 @@ import re
 from datetime import datetime
 
 from aiogram import Router, types, F
-from aiogram.filters import CommandStart, CommandObject
+from aiogram.enums import DiceEmoji
+from aiogram.filters import CommandStart, CommandObject, Command
 from aiogram.types import Message
 
 from db import add_user, get_user_by_id, get_users_collection
@@ -69,6 +70,13 @@ async def command_start_handler(message: types.Message) -> None:
 
     await message.answer(f"Добро пожаловать в бота!", reply_markup=main_keyboard)
 
+
+@router.message(Command("slot"))
+async def send_slot_machine(message: Message):
+    dice_message = await message.answer_dice(emoji=DiceEmoji.SLOT_MACHINE)
+    value = dice_message.dice.value
+
+    print(value)
 
 @router.message(F.text == "🔝 Главное меню")
 async def earn(message: types.Message):
