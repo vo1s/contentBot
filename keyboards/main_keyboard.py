@@ -38,8 +38,20 @@ class Pagination(CallbackData, prefix="pag"):
 def paginator(page: int = 0):
     builder = InlineKeyboardBuilder()
     builder.row(
-        InlineKeyboardButton(text="Prev", callback_data=Pagination(action="prev", page=page).pack()),
-        InlineKeyboardButton(text="Next", callback_data=Pagination(action="next", page=page).pack()),
+        InlineKeyboardButton(text="👈", callback_data=Pagination(action="prev", page=page).pack()),
+        InlineKeyboardButton(text="👉", callback_data=Pagination(action="next", page=page).pack()),
         width=2
     )
     return builder.as_markup()
+
+
+def no_money_keyboard():
+    buttons = [
+        [
+            InlineKeyboardButton(text="⚜️ Premium подписка", callback_data=f"premium_buy"),
+        ],
+        [
+            InlineKeyboardButton(text="👥 Пригласить друзей", callback_data=f"invite_friends"),
+        ],
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=buttons)

@@ -1,9 +1,6 @@
-from typing import Literal
-
-import pymongo
-from pymongo import MongoClient
 from config import config
 from motor.motor_asyncio import AsyncIOMotorClient
+from typing import Literal
 
 db = AsyncIOMotorClient("mongodb://localhost:27017/")[config.db_name.get_secret_value()]
 
@@ -45,7 +42,11 @@ async def manage_balance(user_id: int, balance: int, operation: Literal["add", "
     if not user:
         raise ValueError("User not found")
 
-    new_balance = user['balance'] - balance if operation == "subtract" else user['balance'] + balance
+    # проверка на отрицательный баланс
+    if user['balance'] - balance < 0:
+        new_balance = 0
+    else:
+        new_balance = user['balance'] - balance if operation == "subtract" else user['balance'] + balance
 
     await users_collection.update_one(
         {"_id": user_id},
@@ -53,3 +54,27 @@ async def manage_balance(user_id: int, balance: int, operation: Literal["add", "
     )
 
     return new_balance
+
+
+async def check_balance(user_id: int) -> bool:
+    user = await get_user_by_id(user_id)
+    if user['balance'] >= 2 or user['subscription_status'] == "paid":
+        return True
+    return False
+
+
+async def update_page_index(user_id: int, page: int, collection, max_photo_index: int):
+    await collection.update_one(
+        {"_id": user_id},
+        {"$set": {"photo_index": page}},
+    )
+    if page >= max_photo_index:
+        await collection.update_one(
+            {"_id": user_id},
+            {"$set": {"max_photo_index": page}},
+        )
+
+
+async def get_current_page_index(user_id: int) -> int:
+    user = await get_user_by_id(user_id)
+    return user['photo_index']

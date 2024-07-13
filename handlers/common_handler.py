@@ -42,6 +42,7 @@ async def cmd_start_user(message: Message, command: CommandObject):
             "balance": 10,
             "private_status": False,
             "photo_index": 1,
+            "max_photo_index": 1,
             "refs": 0,
             "refs_bonus": 0
         }
@@ -63,6 +64,7 @@ async def command_start_handler(message: types.Message) -> None:
         "balance": 10,
         "private_status": False,
         "photo_index": 1,
+        "max_photo_index": 1,
         "refs": 0,
         "refs_bonus": 0
     }
@@ -70,13 +72,6 @@ async def command_start_handler(message: types.Message) -> None:
 
     await message.answer(f"Добро пожаловать в бота!", reply_markup=main_keyboard)
 
-
-@router.message(Command("slot"))
-async def send_slot_machine(message: Message):
-    dice_message = await message.answer_dice(emoji=DiceEmoji.SLOT_MACHINE)
-    value = dice_message.dice.value
-
-    print(value)
 
 @router.message(F.text == "🔝 Главное меню")
 async def earn(message: types.Message):

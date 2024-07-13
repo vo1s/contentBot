@@ -1,12 +1,9 @@
 import asyncio
 import logging
 
-import pymongo
-from motor.motor_asyncio import AsyncIOMotorClient
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 
-#from handlers import check_handler, common_handlers, scammer_handlers, report_handler, empty_handler
 from config import config
 from aiogram import Bot
 from aiogram import Dispatcher
@@ -14,10 +11,11 @@ from aiogram import Dispatcher
 from handlers import photo_handler, common_handler, profile_handler, earn_handler, casino_handlers
 
 bot = Bot(token=config.bot_token.get_secret_value(), default=DefaultBotProperties(
-        parse_mode=ParseMode.HTML,
-    )
+    parse_mode=ParseMode.HTML,
 )
+          )
 dp = Dispatcher()
+
 
 async def main():
     # dp.message.middleware(AntiFloodMiddleware())
