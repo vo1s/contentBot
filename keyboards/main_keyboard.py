@@ -3,6 +3,8 @@ from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from config import config
+
 main_keyboard = ReplyKeyboardMarkup(keyboard=[
     [
         KeyboardButton(text="📸 Смотреть фото"),
@@ -30,6 +32,7 @@ earn_keyboard = ReplyKeyboardMarkup(keyboard=[
     ],
 ], resize_keyboard=True, one_time_keyboard=False, selective=True)
 
+
 class Pagination(CallbackData, prefix="pag"):
     action: str
     page: int
@@ -52,6 +55,18 @@ def no_money_keyboard():
         ],
         [
             InlineKeyboardButton(text="👥 Пригласить друзей", callback_data=f"invite_friends"),
+        ],
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def subscribe(original_command: str, user_id: int, username: str):
+    buttons = [
+        [
+            InlineKeyboardButton(text="⚜️ Подписаться", url=config.channel_link.get_secret_value()),
+        ],
+        [
+            InlineKeyboardButton(text="🔒️ Проверить", callback_data=f"check_subscription:{original_command}:{user_id}:{username}"),
         ],
     ]
     return InlineKeyboardMarkup(inline_keyboard=buttons)

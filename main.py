@@ -9,6 +9,7 @@ from aiogram import Bot
 from aiogram import Dispatcher
 
 from handlers import photo_handler, common_handler, profile_handler, earn_handler, casino_handlers
+from middlewares.check_sub_middlware import CheckSubscription
 
 bot = Bot(token=config.bot_token.get_secret_value(), default=DefaultBotProperties(
     parse_mode=ParseMode.HTML,
@@ -19,7 +20,7 @@ dp = Dispatcher()
 
 async def main():
     # dp.message.middleware(AntiFloodMiddleware())
-    #dp.message.middleware(CheckSubscription())
+    dp.message.middleware(CheckSubscription())
 
     logging.basicConfig(level=logging.INFO)
     dp.include_router(photo_handler.router)
