@@ -34,13 +34,18 @@ earn_keyboard = ReplyKeyboardMarkup(keyboard=[
 class Pagination(CallbackData, prefix="pag"):
     action: str
     page: int
+    max_photo_index: int
 
 
-def paginator(page: int = 0):
+def paginator(page: int = 0, max_photo_index: int = 0):
     builder = InlineKeyboardBuilder()
     builder.row(
-        InlineKeyboardButton(text="👈", callback_data=Pagination(action="prev", page=page).pack()),
-        InlineKeyboardButton(text="👉", callback_data=Pagination(action="next", page=page).pack()),
+        InlineKeyboardButton(text="👈", callback_data=Pagination(action="prev", page=page,
+                                                                max_photo_index=max_photo_index).pack()),
+        InlineKeyboardButton(text="👉", callback_data=Pagination(action="next", page=page,
+                                                                max_photo_index=max_photo_index).pack()),
+        InlineKeyboardButton(text="К последнему фото", callback_data=f"navigate_last_bought_image:{max_photo_index}"),
+
         width=2
     )
     return builder.as_markup()
@@ -51,6 +56,7 @@ def no_money_keyboard():
         [
             InlineKeyboardButton(text="⚜️ Premium подписка", callback_data=f"premium_buy"),
         ],
+
         [
             InlineKeyboardButton(text="👥 Пригласить друзей", callback_data=f"invite_friends"),
         ],
@@ -64,7 +70,8 @@ def subscribe(original_command: str, user_id: int, username: str):
             InlineKeyboardButton(text="⚜️ Подписаться", url=config.channel_link.get_secret_value()),
         ],
         [
-            InlineKeyboardButton(text="🔒️ Проверить", callback_data=f"check_subscription:{original_command}:{user_id}:{username}"),
+            InlineKeyboardButton(text="🔒️ Проверить",
+                                 callback_data=f"check_subscription:{original_command}:{user_id}:{username}"),
         ],
     ]
     return InlineKeyboardMarkup(inline_keyboard=buttons)

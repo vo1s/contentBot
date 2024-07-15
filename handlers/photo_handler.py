@@ -40,6 +40,7 @@ async def notify_no_tokens(message):
 @router.message(F.text == "📸 Смотреть фото")
 async def profile(message: types.Message):
     user = await get_user_by_id(message.from_user.id)
+    max_photo_index = user['max_photo_index']
     # если не первая фотка, то                        |
     # показываем всегда следующую, кроме последней    v
     photos_amounts = await photos_collection.count_documents({})
@@ -47,40 +48,20 @@ async def profile(message: types.Message):
         user["photo_index"] + 1
     photo = await get_photo(photo_index)
     if await check_balance(user['_id']):
+        content = f"""
+💦Номер последней купленной фотографии: <b>{max_photo_index}</b>
+💦Номер текущей фотографии: <b>{photo_index}</b>
+        """
         await manage_balance(user['_id'], 2, 'subtract')
-        await message.answer_photo(FSInputFile(photo['file_path']), reply_markup=paginator(photo_index))
+        await message.answer_photo(FSInputFile(
+            photo['file_path']),
+            reply_markup=paginator(photo_index, max_photo_index),
+            caption=content,
+            parse_mode=ParseMode.HTML
+        )
     else:
         await notify_no_tokens(message)
 
-
-# @router.callback_query(Pagination.filter(F.action.in_(["prev", "next"])))
-# async def pagination_photo(callback_query: types.CallbackQuery, callback_data: Pagination):
-#     photos_amounts = await photos_collection.count_documents({})
-#     user = await get_user_by_id(callback_query.from_user.id)
-#     if await check_balance(user['_id']):  # проверяем баланс пользователя на наличие хотя бы двух гемов
-#         if callback_data.action == "prev":
-#             page = max(callback_data.page - 1, 1)
-#         else:
-#             print(await manage_balance(user['_id'], 2, 'subtract'))
-#             page = min(callback_data.page + 1, photos_amounts)
-#
-#         await users_collection.update_one(
-#             {"_id": callback_query.from_user.id},
-#             {"$set": {"photo_index": page}},
-#         )
-#         await callback_query.answer()
-#         photo = await get_photo(page)
-#         if photo:
-#             await bot.edit_message_media(
-#                 media=types.InputMediaPhoto(type="photo", media=FSInputFile(photo['file_path'])),
-#                 chat_id=callback_query.message.chat.id,
-#                 message_id=callback_query.message.message_id,
-#                 reply_markup=paginator(page)
-#             )
-#         else:
-#             await callback_query.answer("No more photos.")
-#     else:
-#         await notify_no_tokens(callback_query.message)
 
 @router.callback_query(Pagination.filter(F.action.in_(["prev", "next"])))
 async def pagination_photo(callback_query: types.CallbackQuery, callback_data: Pagination):
@@ -94,7 +75,7 @@ async def pagination_photo(callback_query: types.CallbackQuery, callback_data: P
                 user['_id']):  # проверяем баланс пользователя на наличие хотя бы двух гемов или премиум подписку
             page = min(callback_data.page + 1, photos_amounts)
             if page > user['max_photo_index']:
-                print(await manage_balance(user['_id'], 2, 'subtract'))
+                await manage_balance(user['_id'], 2, 'subtract')
             await update_page_index(user['_id'], page, users_collection, user['max_photo_index'])
         else:
             await notify_no_tokens(callback_query.message)
@@ -104,14 +85,56 @@ async def pagination_photo(callback_query: types.CallbackQuery, callback_data: P
     photo = await get_photo(page_index)
     with suppress(TelegramBadRequest):
         if photo:
+            content = f"""
+💦Номер последней купленной фотографии: <b>{user['max_photo_index']}</b>
+💦Номер текущей фотографии: <b>{page_index}</b>
+                    """
+
             await bot.edit_message_media(
                 media=types.InputMediaPhoto(type="photo", media=FSInputFile(photo['file_path'])),
                 chat_id=callback_query.message.chat.id,
                 message_id=callback_query.message.message_id,
-                reply_markup=paginator(page_index)
+
+            )
+            await bot.edit_message_caption(
+                chat_id=callback_query.message.chat.id,
+                message_id=callback_query.message.message_id,
+                reply_markup=paginator(page_index, user['max_photo_index']),
+                caption=content,
+                parse_mode=ParseMode.HTML
             )
         else:
             await callback_query.answer("No more photos.")
+
+
+@router.callback_query(F.data.startswith('navigate_last_bought_image'))
+async def navigate_to_last_image(call: CallbackQuery):
+    max_photo_index = int(call.data.split(':')[1])
+
+    photo = await get_photo(max_photo_index)
+    with suppress(TelegramBadRequest):
+        if photo:
+            content = f"""
+💦Номер последней купленной фотографии: <b>{max_photo_index}</b>
+💦Номер текущей фотографии: <b>{max_photo_index}</b>
+                        """
+
+            await bot.edit_message_media(
+                media=types.InputMediaPhoto(type="photo", media=FSInputFile(photo['file_path'])),
+                chat_id=call.message.chat.id,
+                message_id=call.message.message_id,
+
+            )
+            await bot.edit_message_caption(
+                chat_id=call.message.chat.id,
+                message_id=call.message.message_id,
+                reply_markup=paginator(max_photo_index, max_photo_index),
+                caption=content,
+                parse_mode=ParseMode.HTML
+            )
+            await call.answer()
+        else:
+            await call.answer("No more photos.")
 
 
 @router.callback_query(F.data == 'invite_friends')
