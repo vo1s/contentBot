@@ -1,12 +1,12 @@
 import re
-from datetime import datetime
 
-from aiogram import Router, types, F, Bot
-from aiogram.enums import DiceEmoji
+
+from aiogram import Router, types, F
+
 from aiogram.filters import CommandStart, CommandObject, Command
 from aiogram.types import Message, CallbackQuery
 
-from db import add_user, get_user_by_id, get_users_collection, add_user_data
+from db import get_user_by_id, get_users_collection, add_user_data
 from keyboards.main_keyboard import *
 
 router = Router()
@@ -15,14 +15,11 @@ users_collection = get_users_collection()
 
 
 @router.message(CommandStart(deep_link=True, magic=F.args.regexp(re.compile(r'^\d+$'))))
-async def cmd_start_user(message: Message, command: CommandObject, user_id: int = None, username: str = None,
-                         is_premium: bool = None):
+async def cmd_start_user(message: Message, command: CommandObject, user_id: int = None, username: str = None):
     if user_id is None:
         user_id = message.from_user.id
     if username is None:
         username = message.from_user.username
-    if is_premium is None:
-        is_premium = message.from_user.is_premium
 
     args_id = int(command.args)
     print(args_id)
@@ -43,23 +40,20 @@ async def cmd_start_user(message: Message, command: CommandObject, user_id: int 
                 "refs_bonus": int(ref_bonus) + 10
             }},
         )
-        await add_user_data(user_id, username, is_premium)
+        await add_user_data(user_id, username)
         await message.answer("Добро пожаловать в бота!", reply_markup=main_keyboard)
     else:
         await message.answer("Добро пожаловать в бота!", reply_markup=main_keyboard)
 
 
 @router.message(CommandStart())
-async def command_start_handler(message: types.Message, user_id: int = None, username: str = None,
-                                is_premium: bool = None) -> None:
+async def command_start_handler(message: types.Message, user_id: int = None, username: str = None) -> None:
     if user_id is None:
         user_id = message.from_user.id
     if username is None:
         username = message.from_user.username
-    if is_premium is None:
-        is_premium = message.from_user.is_premium
 
-    await add_user_data(user_id, username, is_premium)
+    await add_user_data(user_id, username)
     await message.answer("Добро пожаловать в бота!", reply_markup=main_keyboard)
 
 

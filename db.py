@@ -26,13 +26,12 @@ async def add_user(user_data):
         pass
 
 
-async def add_user_data(user_id, username, is_premium):
+async def add_user_data(user_id, username):
     user_data = {
         "_id": user_id,
         "username": username if username else None,
         "subscription_status": "free",
         "registration_date": datetime.now(),
-        "is_premium": is_premium,
         "balance": 10,
         "private_status": False,
         "photo_index": 1,
