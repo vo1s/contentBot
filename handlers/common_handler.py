@@ -1,13 +1,15 @@
-import re
-
 
 from aiogram import Router, types, F
+from aiogram.enums import ParseMode
 
 from aiogram.filters import CommandStart, CommandObject, Command
 from aiogram.types import Message, CallbackQuery
 
 from db import get_user_by_id, get_users_collection, add_user_data
+from handlers.earn_handler import earn
+
 from keyboards.main_keyboard import *
+import re
 
 router = Router()
 
@@ -22,13 +24,11 @@ async def cmd_start_user(message: Message, command: CommandObject, user_id: int 
         username = message.from_user.username
 
     args_id = int(command.args)
-    print(args_id)
     # Даем преференции пригласившему
     user = await get_user_by_id(args_id)
     referall = await get_user_by_id(user_id)
     print(referall, user_id, user)
     if user and referall is None:
-        print("passed")
         count_user_refs = user["refs"]
         balance = user["balance"]
         ref_bonus = user["refs_bonus"]
@@ -84,6 +84,25 @@ async def check_subscription(callback_query: CallbackQuery):
         )
 
 
+@router.callback_query(F.data == 'invite_friends')
+async def choose(call: CallbackQuery):
+    await earn(call.message)
+    await call.answer()
+
 @router.message(F.text == "🔝 Главное меню")
-async def earn(message: types.Message):
+async def main_menu(message: types.Message):
     await message.answer("🔝 Главное меню", reply_markup=main_keyboard)
+
+
+async def notify_no_tokens(message):
+    content = """
+❌ У тебя закончились 💎 Tokens, жми
+💎 Заработать Tokens или 💎 Пополни баланс (в профиле)
+
+⚜️ Premium подписка дает неограниченный доступ
+*(0 💎 Tokens за просмотр)*
+
+👫 <b>Зарабатывай по 10 💎 Tokens (15 RUB) за каждого приглашенного друга!</b>
+    """
+    await message.delete()
+    await message.answer(text=content, parse_mode=ParseMode.HTML, reply_markup=no_money_keyboard())

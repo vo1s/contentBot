@@ -25,7 +25,7 @@ async def profile(message: types.Message):
 👥 Приглашенные пользователи: {user['refs']}
 💰 Заработано за рефералов: {user['refs_bonus']} 💎
 ➖➖➖➖➖➖➖➖➖➖➖➖➖➖
-⚜️ Premium подписка: {'✅ Активна' if user['subscription_status'] == 'premium' else '❌ Не активна'}
+⚜️ Premium подписка: {'✅ Активна' if user['subscription_status'] == 'paid' else '❌ Не активна'}
         """
         await message.answer(content)
     else:

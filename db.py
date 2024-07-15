@@ -16,6 +16,10 @@ def get_content_collection():
     return db.content
 
 
+def get_videos_collection():
+    return db.videos
+
+
 # Пример асинхронной функции для добавления пользователя
 async def add_user(user_data):
     users_collection = get_users_collection()
@@ -36,6 +40,8 @@ async def add_user_data(user_id, username):
         "private_status": False,
         "photo_index": 1,
         "max_photo_index": 1,
+        "video_index": 1,
+        "max_video_index": 1,
         "refs": 0,
         "refs_bonus": 0
     }
@@ -80,18 +86,19 @@ async def check_balance(user_id: int) -> bool:
     return False
 
 
-async def update_page_index(user_id: int, page: int, collection, max_photo_index: int):
+async def update_page_index(user_id: int, page: int, collection, max_photo_index: int,
+                            index: Literal["photo_index", "video_index"]):
     await collection.update_one(
         {"_id": user_id},
-        {"$set": {"photo_index": page}},
+        {"$set": {index: page}},
     )
     if page >= max_photo_index:
         await collection.update_one(
             {"_id": user_id},
-            {"$set": {"max_photo_index": page}},
+            {"$set": {f"max_{index}": page}},
         )
 
 
-async def get_current_page_index(user_id: int) -> int:
+async def get_current_page_index(user_id: int, index: Literal["photo_index", "video_index"]) -> int:
     user = await get_user_by_id(user_id)
-    return user['photo_index']
+    return user[index]

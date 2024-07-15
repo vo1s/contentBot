@@ -1,3 +1,5 @@
+from typing import Literal
+
 import pymongo
 from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
@@ -31,21 +33,61 @@ earn_keyboard = ReplyKeyboardMarkup(keyboard=[
 ], resize_keyboard=True, one_time_keyboard=False, selective=True)
 
 
+class Pagination1(CallbackData, prefix="pag"):
+    action: str
+    page: int
+    max_photo_index: int
+    index_type: Literal['photo_index', 'video_index']
+
+
+def paginator1(page: int = 0, max_photo_index: int = 0,
+               index_type: Literal['photo_index', 'video_index'] = 'video_index'):
+    builder = InlineKeyboardBuilder()
+    if index_type == 'photo_index':
+        last_button = InlineKeyboardButton(text="К последнему фото",
+                                           callback_data=f"navigate_last_bought_image:{max_photo_index}")
+    else:
+        last_button = InlineKeyboardButton(text="К последнему видео",
+                                           callback_data=f"navigate_last_bought_video:{max_photo_index}")
+
+    builder.row(
+        InlineKeyboardButton(text="👈", callback_data=Pagination(action="prev1", page=page,
+                                                                max_photo_index=max_photo_index,
+                                                                index_type=index_type).pack()),
+        InlineKeyboardButton(text="👉", callback_data=Pagination(action="next1", page=page,
+                                                                max_photo_index=max_photo_index,
+                                                                index_type=index_type).pack()),
+        last_button,
+        width=2
+    )
+    return builder.as_markup()
+
+
 class Pagination(CallbackData, prefix="pag"):
     action: str
     page: int
     max_photo_index: int
+    index_type: Literal['photo_index', 'video_index']
 
 
-def paginator(page: int = 0, max_photo_index: int = 0):
+def paginator(page: int = 0, max_photo_index: int = 0,
+              index_type: Literal['photo_index', 'video_index'] = 'photo_index'):
     builder = InlineKeyboardBuilder()
+    if index_type == 'photo_index':
+        last_button = InlineKeyboardButton(text="К последнему фото",
+                                           callback_data=f"navigate_last_bought_image:{max_photo_index}")
+    else:
+        last_button = InlineKeyboardButton(text="К последнему видео",
+                                           callback_data=f"navigate_last_bought_video:{max_photo_index}")
+
     builder.row(
         InlineKeyboardButton(text="👈", callback_data=Pagination(action="prev", page=page,
-                                                                max_photo_index=max_photo_index).pack()),
+                                                                max_photo_index=max_photo_index,
+                                                                index_type=index_type).pack()),
         InlineKeyboardButton(text="👉", callback_data=Pagination(action="next", page=page,
-                                                                max_photo_index=max_photo_index).pack()),
-        InlineKeyboardButton(text="К последнему фото", callback_data=f"navigate_last_bought_image:{max_photo_index}"),
-
+                                                                max_photo_index=max_photo_index,
+                                                                index_type=index_type).pack()),
+        last_button,
         width=2
     )
     return builder.as_markup()
