@@ -6,30 +6,12 @@ from aiogram.enums import DiceEmoji
 from aiogram.filters import CommandStart, CommandObject, Command
 from aiogram.types import Message, CallbackQuery
 
-from db import add_user, get_user_by_id, get_users_collection
+from db import add_user, get_user_by_id, get_users_collection, add_user_data
 from keyboards.main_keyboard import *
 
 router = Router()
 
 users_collection = get_users_collection()
-
-
-# Вынесение общих данных для добавления пользователя в отдельную функцию
-async def add_user_data(user_id, username, is_premium):
-    user_data = {
-        "_id": user_id,
-        "username": username if username else None,
-        "subscription_status": "free",
-        "registration_date": datetime.now(),
-        "is_premium": is_premium,
-        "balance": 10,
-        "private_status": False,
-        "photo_index": 1,
-        "max_photo_index": 1,
-        "refs": 0,
-        "refs_bonus": 0
-    }
-    await add_user(user_data)
 
 
 @router.message(CommandStart(deep_link=True, magic=F.args.regexp(re.compile(r'^\d+$'))))
@@ -92,16 +74,12 @@ async def check_subscription(callback_query: CallbackQuery):
     if chat_member.status != "left":
         await callback_query.answer("Спасибо за подписку! Теперь у вас есть доступ к боту.")
         await callback_query.message.delete()
-
-        # Извлекаем оригинальную команду из callback_data
         original_command = callback_query.data.split(':', 1)[1]
         print(original_command)
         bot_name = config.bot_name.get_secret_value()
-
-        # Вызов команд с правильными параметрами пользователя
         if original_command.startswith(f'/start?'):
             command_args = original_command.split('?', 1)[1].split(':')[0]
-            fake_command = CommandObject(command_args)
+            fake_command = CommandObject(args=command_args, command='start')
             await cmd_start_user(callback_query.message, fake_command, user_id, username, is_premium)
         else:
             await command_start_handler(callback_query.message, user_id, username, is_premium)

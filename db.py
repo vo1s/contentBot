@@ -1,6 +1,7 @@
 from config import config
 from motor.motor_asyncio import AsyncIOMotorClient
 from typing import Literal
+from datetime import datetime
 
 db = AsyncIOMotorClient("mongodb://localhost:27017/")[config.db_name.get_secret_value()]
 
@@ -23,6 +24,23 @@ async def add_user(user_data):
     else:
         # Пользователь уже существует, можно обновить данные или игнорировать
         pass
+
+
+async def add_user_data(user_id, username, is_premium):
+    user_data = {
+        "_id": user_id,
+        "username": username if username else None,
+        "subscription_status": "free",
+        "registration_date": datetime.now(),
+        "is_premium": is_premium,
+        "balance": 10,
+        "private_status": False,
+        "photo_index": 1,
+        "max_photo_index": 1,
+        "refs": 0,
+        "refs_bonus": 0
+    }
+    await add_user(user_data)
 
 
 # Пример асинхронной функции для получения пользователя по ID

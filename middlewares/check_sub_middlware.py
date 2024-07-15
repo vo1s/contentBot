@@ -8,7 +8,6 @@ from keyboards.main_keyboard import subscribe
 
 
 class CheckSubscription(BaseMiddleware):
-
     async def __call__(
             self,
             handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]],
@@ -27,6 +26,5 @@ class CheckSubscription(BaseMiddleware):
                 content,
                 reply_markup=subscribe(original_command.replace(' ', '?'), event.from_user.id, event.from_user.username)
             )
-            raise CancelHandler()
         else:
             return await handler(event, data)
