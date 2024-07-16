@@ -6,20 +6,13 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import FSInputFile, CallbackQuery
 
 from db import get_content_collection, get_users_collection, get_user_by_id, check_balance, manage_balance, \
-    update_page_index, get_current_page_index, get_videos_collection
+    update_page_index, get_current_page_index, get_videos_collection, get_video
 from handlers.common_handler import notify_no_tokens
 from keyboards.main_keyboard import Pagination, paginator, paginator1
 
 router = Router()
 video_collection = get_videos_collection()
 users_collection = get_users_collection()
-
-
-async def get_video(page: int):
-    video = await video_collection.find().skip(page - 1).limit(1).to_list(length=1)
-    if video:
-        return video[0]
-    return None
 
 
 @router.message(F.text == "📹 Смотреть видео")

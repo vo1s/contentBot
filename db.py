@@ -102,3 +102,17 @@ async def update_page_index(user_id: int, page: int, collection, max_photo_index
 async def get_current_page_index(user_id: int, index: Literal["photo_index", "video_index"]) -> int:
     user = await get_user_by_id(user_id)
     return user[index]
+
+
+async def get_photo(page: int):
+    photo = await get_content_collection().find().skip(page - 1).limit(1).to_list(length=1)
+    if photo:
+        return photo[0]
+    return None
+
+
+async def get_video(page: int):
+    video = await get_videos_collection().find().skip(page - 1).limit(1).to_list(length=1)
+    if video:
+        return video[0]
+    return None

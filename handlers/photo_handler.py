@@ -6,7 +6,7 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import FSInputFile, CallbackQuery
 
 from db import get_content_collection, get_users_collection, get_user_by_id, check_balance, manage_balance, \
-    update_page_index, get_current_page_index
+    update_page_index, get_current_page_index, get_photo
 from handlers.common_handler import notify_no_tokens
 from keyboards.main_keyboard import Pagination, paginator
 
@@ -15,11 +15,7 @@ photos_collection = get_content_collection()
 users_collection = get_users_collection()
 
 
-async def get_photo(page: int):
-    photo = await photos_collection.find().skip(page - 1).limit(1).to_list(length=1)
-    if photo:
-        return photo[0]
-    return None
+
 
 
 
