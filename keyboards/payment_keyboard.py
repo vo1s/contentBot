@@ -2,6 +2,8 @@ from aiogram.types import (ReplyKeyboardMarkup, KeyboardButton,
                            InlineKeyboardMarkup, InlineKeyboardButton)
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from config import config
+
 
 def deposit_keyboard():
     buttons = [
@@ -112,4 +114,18 @@ def check_crypto_bot_payment_keyboard(invoice_id: int, url: str, rub_amount: int
         ],
 
     ]
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def contact_admin_keyboard(rub_amount: int):
+    buttons = [
+        [
+            InlineKeyboardButton(text="💬 Написать", url=config.contact_admin.get_secret_value()),
+
+        ],
+        [
+            InlineKeyboardButton(text="🔙Назад", callback_data=f"enter_money"),
+        ],
+    ]
+
     return InlineKeyboardMarkup(inline_keyboard=buttons)

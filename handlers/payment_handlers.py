@@ -6,7 +6,7 @@ from api.crypto_bot_api import crypto_bot
 from db import get_user_by_id, update_subscription_status, manage_balance
 from handlers.common_handler import subscribe_menu
 from keyboards.payment_keyboard import currencies, check_crypto_bot_payment_keyboard, payment_keyboard, stars_keyboard, \
-    payment_keyboard_stars, stars_keyboard_subscription
+    payment_keyboard_stars, stars_keyboard_subscription, contact_admin_keyboard
 from states import Deposit
 
 router = Router()
@@ -86,14 +86,19 @@ async def check_crypto_bot_payment(call: CallbackQuery, bot: Bot):
 
 # ---------------------- Оплата Stars
 @router.callback_query(F.data.startswith('enter_money'))
-async def enter_money(call: CallbackQuery, state: FSMContext):
+async def enter_money(call: CallbackQuery, state: FSMContext, bot: Bot):
     await state.clear()
     content = """
 💸 Введите сумму пополнения   2 💎 Tokens = 1 RUB
 💰 Минимальная сумма пополнения 50 RUB
     """
     await state.set_state(Deposit.money_amount)
-    await call.message.answer(text=content)
+
+    await bot.edit_message_text(
+        text=content,
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+    )
     await call.answer()
 
 
@@ -106,6 +111,7 @@ async def pay_stars(message: types.Message, bot: Bot, state: FSMContext):
     else:
         content = "👇 Выберите способ оплаты:"
         await message.answer(content, reply_markup=payment_keyboard(money_amount))
+
         await state.clear()
 
 
@@ -187,5 +193,19 @@ async def on_successful_payment(message: types.Message):
         )
 
 
+# Хендлеры оплаты вручную через администратора
+@router.callback_query(F.data.startswith('pay_by_hand'))
+async def pay_stars(call: CallbackQuery, bot: Bot):
+    rub_amount = int(call.data.split(':')[1])
+    content = f"""
+💸 Для пополнения баланса вы можете напрямую связаться с администратором и получить реквизиты для оплаты
 
+Нажмите кнопку <b>"💬 Написать"</b> для связи👇
+    """
+    await bot.edit_message_text(
+        text=content,
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+        reply_markup=contact_admin_keyboard(rub_amount)
+    )
 

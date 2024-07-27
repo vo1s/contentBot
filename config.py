@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     bot_name: SecretStr
     channel_name: SecretStr
     channel_link: SecretStr
+    contact_admin: SecretStr
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
 
 
