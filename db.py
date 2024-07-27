@@ -65,19 +65,26 @@ async def manage_balance(user_id: int, balance: int, operation: Literal["add", "
     if not user:
         raise ValueError("User not found")
 
+    if await check_subscription(user_id):
     # проверка на отрицательный баланс
-    if user['balance'] - balance < 0:
-        new_balance = 0
-    else:
-        new_balance = user['balance'] - balance if operation == "subtract" else user['balance'] + balance
+        if user['balance'] - balance < 0 and operation == "subtract":
+            new_balance = 0
+        else:
+            new_balance = user['balance'] - balance if operation == "subtract" else user['balance'] + balance
 
-    await users_collection.update_one(
-        {"_id": user_id},
-        {"$set": {"balance": new_balance}}
-    )
+        await users_collection.update_one(
+            {"_id": user_id},
+            {"$set": {"balance": new_balance}}
+        )
 
-    return new_balance
+        return new_balance
 
+
+async def check_subscription(user_id: int) -> bool:
+    user = await get_user_by_id(user_id)
+    if user['subscription_status'] == "paid":
+        return True
+    return False
 
 async def check_balance(user_id: int) -> bool:
     user = await get_user_by_id(user_id)

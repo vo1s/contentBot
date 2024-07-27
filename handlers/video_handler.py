@@ -30,7 +30,8 @@ async def profile(message: types.Message):
 💦Номер последнего купленного видео: <b>{max_video_index}</b>
 💦Номер текущего видео: <b>{video_index}</b>
         """
-        await manage_balance(user['_id'], 2, 'subtract')
+        if user["video_index"] > user['max_video_index']:
+            await manage_balance(user['_id'], 2, 'subtract')
         await message.answer_video(FSInputFile(
             photo['file_path']),
             reply_markup=paginator1(video_index, max_video_index, 'video_index'),

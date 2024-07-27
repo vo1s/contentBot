@@ -1,4 +1,4 @@
-
+from aiocryptopay import AioCryptoPay, Networks
 from aiogram import Router, types, F
 from aiogram.enums import ParseMode
 
@@ -10,6 +10,8 @@ from handlers.earn_handler import earn
 
 from keyboards.main_keyboard import *
 import re
+
+from keyboards.payment_keyboard import payment_keyboard, payment_keyboard_subscription
 
 router = Router()
 
@@ -74,9 +76,9 @@ async def check_subscription(callback_query: CallbackQuery):
         if original_command.startswith(f'/start?'):
             command_args = original_command.split('?', 1)[1].split(':')[0]
             fake_command = CommandObject(args=command_args, command='start')
-            await cmd_start_user(callback_query.message, fake_command, user_id, username, is_premium)
+            await cmd_start_user(callback_query.message, fake_command, user_id, username)
         else:
-            await command_start_handler(callback_query.message, user_id, username, is_premium)
+            await command_start_handler(callback_query.message, user_id, username)
     else:
         await callback_query.answer(
             "Вы еще не подписались на канал. Пожалуйста, подпишитесь и попробуйте снова.",
@@ -106,3 +108,30 @@ async def notify_no_tokens(message):
     """
     await message.delete()
     await message.answer(text=content, parse_mode=ParseMode.HTML, reply_markup=no_money_keyboard())
+
+
+@router.message(F.text == "🔒 Подписка")
+async def subscribe_menu(message: types.Message):
+    content = f"""
+❗️ ВНИМАНИЕ АКЦИЯ ❗️
+🔥 Только до конца дня (до 23:59)
+💵 Стоимость подписки всего: 299 рублей(вместо 599 RUB)
+
+⚜️ Premium подписка:
+- неограниченный доступ(0 💎 Tokens за просмотр)
+- самый запрещенный и жаркий контент 🔞
+- Возможность покупки 🔞 Privat Archive
+⚜️ Premium подписка активируется навсегда
+(если бот забанят, подписка будет работать в новом) 🔞
+
+
+⚡️ Покупай сейчас и наслаждайся 💦
+👇 Нажми кнопку ниже для оплаты 👇
+    """
+    user = await get_user_by_id(message.chat.id)
+    subs_status = user['subscription_status']
+    if subs_status == 'free':
+        await message.answer(content, reply_markup=payment_keyboard_subscription(299))
+    else:
+        await message.answer('У вас активирована премиум подписка! Спасибо и наслаждайтесь!')
+

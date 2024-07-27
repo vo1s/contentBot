@@ -10,11 +10,10 @@ from config import config
 main_keyboard = ReplyKeyboardMarkup(keyboard=[
     [
         KeyboardButton(text="📸 Смотреть фото"),
-        KeyboardButton(text="👤 Профиль"),
-        KeyboardButton(text="🗂 Категории")
+        KeyboardButton(text="📹 Смотреть видео"),
     ],
     [
-        KeyboardButton(text="📹 Смотреть видео"),
+        KeyboardButton(text="👤 Профиль"),
         KeyboardButton(text="💰 Заработать"),
         KeyboardButton(text="🔒 Подписка"),
     ],

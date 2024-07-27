@@ -6,6 +6,7 @@ from aiogram.utils.formatting import as_list, as_marked_section, Bold, as_line
 
 from db import add_user, get_user_by_id
 from keyboards.main_keyboard import main_keyboard
+from keyboards.payment_keyboard import deposit_keyboard
 
 router = Router()
 
@@ -27,6 +28,6 @@ async def profile(message: types.Message):
 ➖➖➖➖➖➖➖➖➖➖➖➖➖➖
 ⚜️ Premium подписка: {'✅ Активна' if user['subscription_status'] == 'paid' else '❌ Не активна'}
         """
-        await message.answer(content)
+        await message.answer(text=content, reply_markup=deposit_keyboard(), message_effect_id="5046509860389126442")
     else:
         await message.answer("Информация о пользователе не найдена, попробуйте перезагрузить бота!")

@@ -36,7 +36,8 @@ async def profile(message: types.Message):
 💦Номер последней купленной фотографии: <b>{max_photo_index}</b>
 💦Номер текущей фотографии: <b>{photo_index}</b>
         """
-        await manage_balance(user['_id'], 2, 'subtract')
+        if user["photo_index"] > user['max_photo_index']:
+            await manage_balance(user['_id'], 2, 'subtract')
         await message.answer_photo(FSInputFile(
             photo['file_path']),
             reply_markup=paginator(photo_index, max_photo_index, 'photo_index'),

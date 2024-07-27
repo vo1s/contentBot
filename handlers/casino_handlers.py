@@ -158,8 +158,8 @@ async def dice(message: types.Message, state: FSMContext):
             await message.answer(f"Недостаточно средств! Ваша максимальная ставка - <b>{user['balance']} 💎 Гема!</b>",
                                  parse_mode="html", reply_markup=back_casino_keyboard())
         else:
-            data = await state.get_data()
-            new_balance = await manage_balance(message.from_user.id, bet, 'subtract')
+            await state.get_data()
+            await manage_balance(message.from_user.id, bet, 'subtract')
 
             msg = await message.answer_dice(emoji=DiceEmoji.DART)
             await asyncio.sleep(2)

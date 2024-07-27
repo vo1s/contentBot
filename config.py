@@ -4,6 +4,7 @@ from pydantic import SecretStr
 
 class Settings(BaseSettings):
     bot_token: SecretStr
+    crypto_bot_token: SecretStr
     db_name: SecretStr
     bot_name: SecretStr
     channel_name: SecretStr
