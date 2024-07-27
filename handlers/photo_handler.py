@@ -15,12 +15,6 @@ photos_collection = get_content_collection()
 users_collection = get_users_collection()
 
 
-
-
-
-
-
-
 @router.message(F.text == "📸 Смотреть фото")
 async def profile(message: types.Message):
     user = await get_user_by_id(message.from_user.id)
@@ -120,6 +114,3 @@ async def navigate_to_last_image(call: CallbackQuery, bot: Bot):
             await call.answer()
         else:
             await call.answer("No more photos.")
-
-
-
