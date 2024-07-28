@@ -65,7 +65,7 @@ async def manage_balance(user_id: int, balance: int, operation: Literal["add", "
     if not user:
         raise ValueError("User not found")
 
-    if await check_subscription(user_id):
+    if not await check_subscription(user_id):
     # проверка на отрицательный баланс
         if user['balance'] - balance < 0 and operation == "subtract":
             new_balance = 0
