@@ -37,13 +37,19 @@ async def add_user_data(user_id, username):
         "subscription_status": "free",
         "registration_date": datetime.now(),
         "balance": 10,
-        "private_status": False,
         "photo_index": 1,
         "max_photo_index": 1,
         "video_index": 1,
         "max_video_index": 1,
-        "refs": 0,
-        "refs_bonus": 0
+        "reff_info": {
+            "reff_id": None,
+            "refs": 0,
+            "refs_bonus": 0,
+            "level_1_bonus": 10,
+            "level_2_bonus": 2.5,
+            "earned_by_deposit": 0
+        }
+
     }
     await add_user(user_data)
 
@@ -59,6 +65,19 @@ async def update_subscription_status(user_id, status):
     await users_collection.update_one({"_id": user_id}, {"$set": {"subscription_status": status}})
 
 
+async def distribute_money_reffs(user_id: int, balance: int):
+    users_collection = get_users_collection()
+    user = await get_user_by_id(user_id)
+    level_1_inviter = await get_user_by_id(user['reff_info']['reff_id'])
+    if level_1_inviter is not None:  # НАЧИСЛЯЕМ БОНУС РЕФФЕРАЛУ ПЕРВОГО УРОВНЯ
+        bonus = int(balance * int(level_1_inviter['reff_info']['level_1_bonus']) / 50) # сумма_поплнения * %первого уровня * 2
+        await manage_balance(level_1_inviter['_id'], bonus, 'add')
+        level_2_inviter = await get_user_by_id(level_1_inviter['reff_info']['reff_id'])
+        if level_2_inviter is not None:  # НАЧИСЛЯЕМ БОНУС РЕФФЕРАЛУ ВТОРОГО УРОВНЯ
+            bonus = int(balance * int(level_2_inviter['reff_info']['level_2_bonus']) / 50) # сумма_поплнения * %второго уровня * 2
+            await manage_balance(level_2_inviter['_id'], bonus, 'add')
+
+
 async def manage_balance(user_id: int, balance: int, operation: Literal["add", "subtract"]):
     users_collection = get_users_collection()
     user = await get_user_by_id(user_id)
@@ -66,7 +85,7 @@ async def manage_balance(user_id: int, balance: int, operation: Literal["add", "
         raise ValueError("User not found")
 
     if not await check_subscription(user_id):
-    # проверка на отрицательный баланс
+        # проверка на отрицательный баланс
         if user['balance'] - balance < 0 and operation == "subtract":
             new_balance = 0
         else:
@@ -85,6 +104,7 @@ async def check_subscription(user_id: int) -> bool:
     if user['subscription_status'] == "paid":
         return True
     return False
+
 
 async def check_balance(user_id: int) -> bool:
     user = await get_user_by_id(user_id)

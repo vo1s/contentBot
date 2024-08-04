@@ -3,7 +3,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, LabeledPrice, PreCheckoutQuery
 
 from api.crypto_bot_api import crypto_bot
-from db import get_user_by_id, update_subscription_status, manage_balance
+from db import get_user_by_id, update_subscription_status, manage_balance, distribute_money_reffs
 from handlers.common_handler import subscribe_menu
 from keyboards.payment_keyboard import currencies, check_crypto_bot_payment_keyboard, payment_keyboard, stars_keyboard, \
     payment_keyboard_stars, stars_keyboard_subscription, contact_admin_keyboard
@@ -55,6 +55,7 @@ async def pay_crypto_check(call: CallbackQuery, bot: Bot):
     await call.answer()
 
 
+# -------------- НАЧИСЛЕНИЕ ДЕПОЗИТА ИЛИ ПОДПИСКИ ЧЕРЕЗ КРИПТОБОТА
 @router.callback_query(F.data.startswith('check_crypto_bot_payment'))
 async def check_crypto_bot_payment(call: CallbackQuery, bot: Bot):
     invoice_id = call.data.split(':')[1]
@@ -64,6 +65,7 @@ async def check_crypto_bot_payment(call: CallbackQuery, bot: Bot):
     if invoice[0].status == 'paid':
         if rub_amount == '299':
             await update_subscription_status(call.message.chat.id, 'paid')
+            await distribute_money_reffs(call.message.chat.id, int(rub_amount))
             await bot.edit_message_text(
                 text="Ваша подписка успешно оплачена! Поздравляю",
                 chat_id=call.message.chat.id,
@@ -71,7 +73,8 @@ async def check_crypto_bot_payment(call: CallbackQuery, bot: Bot):
 
             )
         else:
-            new_balance = await manage_balance(call.message.chat.id, int(rub_amount)*2, 'add')
+            new_balance = await manage_balance(call.message.chat.id, int(rub_amount) * 2, 'add')
+            await distribute_money_reffs(call.message.chat.id, int(rub_amount))
             await bot.edit_message_text(
                 text=f"Ваш баланс успешно пополнен! Баланс - <b>{new_balance} 💎</b>",
                 chat_id=call.message.chat.id,
@@ -171,6 +174,8 @@ async def pre_checkout_handler(pre_checkout_query: PreCheckoutQuery):
     await pre_checkout_query.answer(ok=True)
 
 
+# -------------- НАЧИСЛЕНИЕ ДЕПОЗИТА ИЛИ ПОДПИСКИ ЧЕРЕЗ ЗВЕЗДЫ
+
 @router.message(F.successful_payment)
 async def on_successful_payment(message: types.Message):
     user_id = message.successful_payment.invoice_payload.split(":")[0]
@@ -178,9 +183,11 @@ async def on_successful_payment(message: types.Message):
 
     if amount_rubles == '299':
         await update_subscription_status(message.chat.id, 'paid')
+        await distribute_money_reffs(message.chat.id, int(amount_rubles))
         await message.answer("Ваша подписка оплачена! Поздравляю!")
     else:
         new_balance = await manage_balance(int(user_id), round(int(amount_rubles) * 2), 'add')
+        await distribute_money_reffs(message.chat.id, int(amount_rubles))
         content = f"""
 <b>Огромное спасибо!</b>
 
@@ -208,4 +215,3 @@ async def pay_stars(call: CallbackQuery, bot: Bot):
         message_id=call.message.message_id,
         reply_markup=contact_admin_keyboard(rub_amount)
     )
-

@@ -29,20 +29,27 @@ async def cmd_start_user(message: Message, command: CommandObject, user_id: int 
     # Даем преференции пригласившему
     user = await get_user_by_id(args_id)
     referall = await get_user_by_id(user_id)
-    print(referall, user_id, user)
-    if user and referall is None:
-        count_user_refs = user["refs"]
+    if user and (referall is None):
+        count_user_refs = user['reff_info']["refs"]
         balance = user["balance"]
-        ref_bonus = user["refs_bonus"]
+        ref_bonus = user['reff_info']["refs_bonus"]
         await users_collection.update_one(
             {"_id": user["_id"]},
             {"$set": {
-                "refs": int(count_user_refs) + 1,
+                "reff_info.refs": int(count_user_refs) + 1,
                 "balance": int(balance) + 10,
-                "refs_bonus": int(ref_bonus) + 10
+                "reff_info.refs_bonus": int(ref_bonus) + 10
             }},
         )
         await add_user_data(user_id, username)
+        # записываем id инвайтера к реффералу
+        new_user = await get_user_by_id(user_id)
+        await users_collection.update_one(
+            {"_id": new_user["_id"]},
+            {"$set": {
+                "reff_info.reff_id": user["_id"]
+            }}
+        )
         await message.answer("Добро пожаловать в бота!", reply_markup=main_keyboard)
     else:
         await message.answer("Добро пожаловать в бота!", reply_markup=main_keyboard)
