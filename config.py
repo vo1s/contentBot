@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     channel_name: SecretStr
     channel_link: SecretStr
     contact_admin: SecretStr
+    moderation_chat_id: SecretStr
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
 
 

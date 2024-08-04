@@ -1,6 +1,10 @@
 from aiogram.fsm.state import StatesGroup, State
 
 
+class Withdraw(StatesGroup):
+    amount = State()
+
+
 class Deposit(StatesGroup):
     money_amount = State()
 

@@ -4,6 +4,7 @@ from aiogram import Router, types, F
 from aiogram.filters import CommandStart
 from aiogram.utils.formatting import as_list, as_marked_section, Bold, as_line
 
+from api.crypto_bot_api import crypto_bot
 from db import add_user, get_user_by_id
 from keyboards.main_keyboard import main_keyboard
 from keyboards.payment_keyboard import deposit_keyboard
@@ -21,11 +22,11 @@ async def profile(message: types.Message):
 🔑 ID: {user['_id']}
 👤 Логин: {user['username']}
 📆 Дата регистрации: {user['registration_date'].strftime('%d-%m-%Y %H:%M')}
-➖➖➖➖➖➖➖➖➖➖➖➖➖➖
+➖➖➖➖➖➖➖➖➖➖➖➖➖
 💸 Баланс: {user['balance']} 💎 Tokens
 👥 Приглашенные пользователи: {user['reff_info']['refs']}
 💰 Заработано за рефералов: {user['reff_info']['refs_bonus']} 💎
-➖➖➖➖➖➖➖➖➖➖➖➖➖➖
+➖➖➖➖➖➖➖➖➖➖➖➖➖
 ⚜️ Premium подписка: {'✅ Активна' if user['subscription_status'] == 'paid' else '❌ Не активна'}
         """
         await message.answer(text=content, reply_markup=deposit_keyboard(), message_effect_id="5046509860389126442")

@@ -10,8 +10,12 @@ def deposit_keyboard():
         [
             InlineKeyboardButton(text="💰Пополнить", callback_data=f"enter_money"),
         ],
+        [
+            InlineKeyboardButton(text="💳 Вывести", callback_data="withdraw_main")
+        ],
     ]
     return InlineKeyboardMarkup(inline_keyboard=buttons)
+
 
 #Клавиатура на подписку
 def payment_keyboard_subscription(rub_amount: int):
@@ -28,6 +32,7 @@ def payment_keyboard_subscription(rub_amount: int):
 
     ]
     return InlineKeyboardMarkup(inline_keyboard=buttons)
+
 
 def stars_keyboard_subscription():
     buttons = [
@@ -117,6 +122,17 @@ def check_crypto_bot_payment_keyboard(invoice_id: int, url: str, rub_amount: int
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
+def admin():
+    buttons = [
+        [
+            InlineKeyboardButton(text="💬 Написать", url=config.contact_admin.get_secret_value()),
+
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
 def contact_admin_keyboard(rub_amount: int):
     buttons = [
         [
@@ -125,6 +141,19 @@ def contact_admin_keyboard(rub_amount: int):
         ],
         [
             InlineKeyboardButton(text="🔙Назад", callback_data=f"enter_money"),
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def confirm_withdraw_keyboard(amount: int):
+    buttons = [
+        [
+            InlineKeyboardButton(text="👌Подтвердить", callback_data=f"confirm_withdraw:{amount}"),
+        ],
+        [
+            InlineKeyboardButton(text="🔙Назад", callback_data=f"withdraw"),
         ],
     ]
 
