@@ -7,17 +7,24 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from config import config
 
-main_keyboard = ReplyKeyboardMarkup(keyboard=[
-    [
-        KeyboardButton(text="📸 Смотреть фото"),
-        KeyboardButton(text="📹 Смотреть видео"),
-    ],
-    [
-        KeyboardButton(text="👤 Профиль"),
-        KeyboardButton(text="💰 Заработать"),
-        KeyboardButton(text="🔒 Подписка"),
-    ],
-], resize_keyboard=True, one_time_keyboard=False, selective=True)
+
+def main_keyboard(is_admin: bool):
+    keyboard = [
+        [
+            KeyboardButton(text="📸 Смотреть фото"),
+            KeyboardButton(text="📹 Смотреть видео"),
+        ],
+        [
+            KeyboardButton(text="👤 Профиль"),
+            KeyboardButton(text="💰 Заработать"),
+            KeyboardButton(text="🔒 Подписка"),
+        ],
+    ]
+
+    if is_admin:
+        keyboard.append([KeyboardButton(text="⚙️ Админ")])
+
+    return ReplyKeyboardMarkup(keyboard=keyboard, resize_keyboard=True, one_time_keyboard=False, selective=True)
 
 earn_keyboard = ReplyKeyboardMarkup(keyboard=[
     [

@@ -16,6 +16,7 @@ from keyboards.payment_keyboard import payment_keyboard, payment_keyboard_subscr
 router = Router()
 
 users_collection = get_users_collection()
+admins = list(map(int, config.admins.get_secret_value().split(',')))
 
 
 @router.message(CommandStart(deep_link=True, magic=F.args.regexp(re.compile(r'^\d+$'))))
@@ -50,9 +51,11 @@ async def cmd_start_user(message: Message, command: CommandObject, user_id: int 
                 "reff_info.reff_id": user["_id"]
             }}
         )
-        await message.answer("Добро пожаловать в бота!", reply_markup=main_keyboard)
+        is_admin = message.from_user.id in admins
+        await message.answer("Добро пожаловать в бота!", reply_markup=main_keyboard(is_admin))
     else:
-        await message.answer("Добро пожаловать в бота!", reply_markup=main_keyboard)
+        is_admin = message.from_user.id in admins
+        await message.answer("Добро пожаловать в бота!", reply_markup=main_keyboard(is_admin))
 
 
 @router.message(CommandStart())
@@ -63,7 +66,8 @@ async def command_start_handler(message: types.Message, user_id: int = None, use
         username = message.from_user.username
 
     await add_user_data(user_id, username)
-    await message.answer("Добро пожаловать в бота!", reply_markup=main_keyboard)
+    is_admin = message.from_user.id in admins
+    await message.answer("Добро пожаловать в бота!", reply_markup=main_keyboard(is_admin))
 
 
 @router.callback_query(F.data.startswith('check_subscription'))
@@ -98,9 +102,11 @@ async def choose(call: CallbackQuery):
     await earn(call.message)
     await call.answer()
 
+
 @router.message(F.text == "🔝 Главное меню")
 async def main_menu(message: types.Message):
-    await message.answer("🔝 Главное меню", reply_markup=main_keyboard)
+    is_admin = message.from_user.id in admins
+    await message.answer("🔝 Главное меню", reply_markup=main_keyboard(is_admin))
 
 
 async def notify_no_tokens(message):
@@ -121,13 +127,12 @@ async def notify_no_tokens(message):
 async def subscribe_menu(message: types.Message):
     content = f"""
 ❗️ ВНИМАНИЕ АКЦИЯ ❗️
-🔥 Только до конца дня (до 23:59)
 💵 Стоимость подписки всего: 299 рублей(вместо 599 RUB)
 
 ⚜️ Premium подписка:
-- неограниченный доступ(0 💎 Tokens за просмотр)
+- неограниченный доступ (0 💎 Tokens за просмотр)
 - самый запрещенный и жаркий контент 🔞
-- Возможность покупки 🔞 Privat Archive
+- повышенные проценты реферальной программы (12% и 3%)
 ⚜️ Premium подписка активируется навсегда
 (если бот забанят, подписка будет работать в новом) 🔞
 
@@ -141,4 +146,3 @@ async def subscribe_menu(message: types.Message):
         await message.answer(content, reply_markup=payment_keyboard_subscription(299))
     else:
         await message.answer('У вас активирована премиум подписка! Спасибо и наслаждайтесь!')
-
