@@ -3,7 +3,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from typing import Literal
 from datetime import datetime
 
-db = AsyncIOMotorClient("mongodb://localhost:27017/")[config.db_name.get_secret_value()]
+db = AsyncIOMotorClient(config.db.get_secret_value())[config.db_name.get_secret_value()]
 
 
 # Функция для получения коллекции пользователей

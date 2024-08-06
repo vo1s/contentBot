@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     contact_admin: SecretStr
     moderation_chat_id: SecretStr
     admins: SecretStr
+    db: SecretStr
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
 
 
