@@ -9,7 +9,7 @@ from aiogram import Bot
 from aiogram import Dispatcher
 
 from handlers import photo_handler, common_handler, profile_handler, earn_handler, casino_handlers, video_handler, \
-    payment_handlers, withdraw_handlers
+    payment_handlers, withdraw_handlers, admin_handlers
 from middlewares.check_sub_middlware import CheckSubscription
 
 bot = Bot(token=config.bot_token.get_secret_value(), default=DefaultBotProperties(
@@ -17,7 +17,6 @@ bot = Bot(token=config.bot_token.get_secret_value(), default=DefaultBotPropertie
 )
           )
 dp = Dispatcher()
-
 
 async def main():
     # dp.message.middleware(AntiFloodMiddleware())
@@ -32,8 +31,10 @@ async def main():
     dp.include_router(video_handler.router)
     dp.include_router(payment_handlers.router)
     dp.include_router(withdraw_handlers.router)
+    dp.include_router(admin_handlers.router)
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
+
 
 
 if __name__ == '__main__':

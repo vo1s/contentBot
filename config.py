@@ -5,6 +5,7 @@ from pydantic import SecretStr
 class Settings(BaseSettings):
     bot_token: SecretStr
     crypto_bot_token: SecretStr
+    cactuspay_token: SecretStr
     db_name: SecretStr
     bot_name: SecretStr
     channel_name: SecretStr
@@ -13,6 +14,7 @@ class Settings(BaseSettings):
     moderation_chat_id: SecretStr
     admins: SecretStr
     db: SecretStr
+
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
 
 

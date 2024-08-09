@@ -2,11 +2,13 @@ from aiogram import Router, F, Bot, types
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, LabeledPrice, PreCheckoutQuery
 
+from api.api_cactuspay import create_payment, get_payment_info
 from api.crypto_bot_api import crypto_bot
+from config import config
 from db import get_user_by_id, update_subscription_status, manage_balance, distribute_money_reffs
 from handlers.common_handler import subscribe_menu
 from keyboards.payment_keyboard import currencies, check_crypto_bot_payment_keyboard, payment_keyboard, stars_keyboard, \
-    payment_keyboard_stars, stars_keyboard_subscription, contact_admin_keyboard
+    payment_keyboard_stars, stars_keyboard_subscription, contact_admin_keyboard, check_cactuspay_keyboard
 from states import Deposit
 
 router = Router()
@@ -24,6 +26,30 @@ async def pay_crypto(call: CallbackQuery, bot: Bot):
     await call.answer()
 
 
+# -------------- Оплата картой
+@router.callback_query(F.data.startswith('pay_spb'))
+async def pay_sbp(call: CallbackQuery, bot: Bot):
+    content = f"""
+⌛️ После оплаты нажмите "🔍 Проверить оплату"
+(Активация автоматическая сразу после проверки оплаты)
+        """
+    amount = call.data.split(':')[1]
+    url = await create_payment(config.cactuspay_token.get_secret_value(), int(amount))
+    order_id = url.split('/')[-1]
+    await bot.edit_message_text(
+        text=content,
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+        reply_markup=check_cactuspay_keyboard(order_id, url, int(amount))
+    )
+
+
+@router.callback_query(F.data.startswith('check_cactus_payment'))
+async def pay_sbp_check(call: CallbackQuery, bot: Bot):
+    order_id = call.data.split(':')[1]
+    amount = call.data.split(':')[2]
+    result = await get_payment_info(config.cactuspay_token.get_secret_value(), order_id)
+    print(result)
 # ---------------------- Оплата CryptoBot
 
 @router.callback_query(F.data.startswith('back_to_pay_menu'))

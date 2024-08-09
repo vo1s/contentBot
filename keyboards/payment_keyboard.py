@@ -24,6 +24,9 @@ def payment_keyboard_subscription(rub_amount: int):
             InlineKeyboardButton(text="🪙CryptoBot", callback_data=f"pay_crypto_keyboard:{rub_amount}"),
         ],
         [
+            InlineKeyboardButton(text="💳КАРТА | СПБ", callback_data=f"pay_spb:{rub_amount}"),
+        ],
+        [
             InlineKeyboardButton(text="💸Оплата через администратора(рубли)", callback_data=f"pay_by_hand:{rub_amount}"),
         ],
         [
@@ -48,6 +51,9 @@ def payment_keyboard(rub_amount: int):
     buttons = [
         [
             InlineKeyboardButton(text="🪙CryptoBot", callback_data=f"pay_crypto_keyboard:{rub_amount}"),
+        ],
+        [
+            InlineKeyboardButton(text="💳КАРТА | СПБ", callback_data=f"pay_spb_keyboard:{rub_amount}"),
         ],
         [
             InlineKeyboardButton(text="💸Оплата через администратора(рубли)", callback_data=f"pay_by_hand:{rub_amount}"),
@@ -116,6 +122,23 @@ def check_crypto_bot_payment_keyboard(invoice_id: int, url: str, rub_amount: int
         ],
         [
             InlineKeyboardButton(text="🔙Назад", callback_data=f"pay_crypto_keyboard:{rub_amount}"),
+        ],
+
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def check_cactuspay_keyboard(order_id: str, url: str, rub_amount: int):
+    buttons = [
+        [
+            InlineKeyboardButton(text="Оплатить", url=url),
+        ],
+        [
+            InlineKeyboardButton(text="🔍Проверить оплату",
+                                 callback_data=f"check_cactus_payment:{order_id}:{rub_amount}"),
+        ],
+        [
+            InlineKeyboardButton(text="🔙Назад", callback_data=f"pay_spb_keyboard:{rub_amount}"),
         ],
 
     ]
