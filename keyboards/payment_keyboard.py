@@ -137,9 +137,6 @@ def check_cactuspay_keyboard(order_id: str, url: str, rub_amount: int):
             InlineKeyboardButton(text="🔍Проверить оплату",
                                  callback_data=f"check_cactus_payment:{order_id}:{rub_amount}"),
         ],
-        [
-            InlineKeyboardButton(text="🔙Назад", callback_data=f"pay_spb_keyboard:{rub_amount}"),
-        ],
 
     ]
     return InlineKeyboardMarkup(inline_keyboard=buttons)

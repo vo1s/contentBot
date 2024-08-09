@@ -10,8 +10,14 @@ from handlers.common_handler import subscribe_menu
 from keyboards.payment_keyboard import currencies, check_crypto_bot_payment_keyboard, payment_keyboard, stars_keyboard, \
     payment_keyboard_stars, stars_keyboard_subscription, contact_admin_keyboard, check_cactuspay_keyboard
 from states import Deposit
+import uuid
 
 router = Router()
+
+
+def generate_unique_string():
+    unique_string = str(uuid.uuid4())
+    return unique_string
 
 
 @router.callback_query(F.data.startswith('pay_crypto_keyboard'))
@@ -34,7 +40,8 @@ async def pay_sbp(call: CallbackQuery, bot: Bot):
 (Активация автоматическая сразу после проверки оплаты)
         """
     amount = call.data.split(':')[1]
-    url = await create_payment(config.cactuspay_token.get_secret_value(), int(amount))
+    order_id = generate_unique_string()
+    url = await create_payment(config.cactuspay_token.get_secret_value(), int(amount), order_id)
     order_id = url.split('/')[-1]
     await bot.edit_message_text(
         text=content,
@@ -42,6 +49,7 @@ async def pay_sbp(call: CallbackQuery, bot: Bot):
         message_id=call.message.message_id,
         reply_markup=check_cactuspay_keyboard(order_id, url, int(amount))
     )
+    await call.answer()
 
 
 @router.callback_query(F.data.startswith('check_cactus_payment'))
@@ -49,7 +57,32 @@ async def pay_sbp_check(call: CallbackQuery, bot: Bot):
     order_id = call.data.split(':')[1]
     amount = call.data.split(':')[2]
     result = await get_payment_info(config.cactuspay_token.get_secret_value(), order_id)
-    print(result)
+    if result.lower() == 'accept':
+        if amount == '299':
+            await update_subscription_status(call.message.chat.id, 'paid')
+            await distribute_money_reffs(call.message.chat.id, int(amount))
+            await bot.edit_message_text(
+                text="Ваша подписка успешно оплачена! Поздравляю",
+                chat_id=call.message.chat.id,
+                message_id=call.message.message_id,
+
+            )
+        else:
+            new_balance = await manage_balance(call.message.chat.id, int(amount) * 2, 'add')
+            await distribute_money_reffs(call.message.chat.id, int(amount))
+            await bot.edit_message_text(
+                text=f"Ваш баланс успешно пополнен! Баланс - <b>{new_balance} 💎</b>",
+                chat_id=call.message.chat.id,
+                message_id=call.message.message_id,
+            )
+    if result.lower() == 'cancel':
+        await call.answer("Ваш платеж отменен!", show_alert=True)
+    else:
+        await call.answer("Ваш счет еще не оплачен! Оплатите и возвращайтесь", show_alert=True)
+    await call.answer()
+
+
+
 # ---------------------- Оплата CryptoBot
 
 @router.callback_query(F.data.startswith('back_to_pay_menu'))
@@ -119,7 +152,7 @@ async def enter_money(call: CallbackQuery, state: FSMContext, bot: Bot):
     await state.clear()
     content = """
 💸 Введите сумму пополнения   2 💎 Tokens = 1 RUB
-💰 Минимальная сумма пополнения 50 RUB
+💰 Минимальная сумма пополнения 100 RUB
     """
     await state.set_state(Deposit.money_amount)
 
@@ -135,8 +168,8 @@ async def enter_money(call: CallbackQuery, state: FSMContext, bot: Bot):
 @router.message(Deposit.money_amount, F.text.regexp(r'^[1-9]\d*$'))
 async def pay_stars(message: types.Message, bot: Bot, state: FSMContext):
     money_amount = int(message.text)
-    if money_amount < 50:
-        await message.answer("Минимальная сумма пополнения <b>50 RUB</b>!")
+    if money_amount < 100:
+        await message.answer("Минимальная сумма пополнения <b>1000 RUB</b>!")
     else:
         content = "👇 Выберите способ оплаты:"
         await message.answer(content, reply_markup=payment_keyboard(money_amount))

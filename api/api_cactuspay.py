@@ -51,6 +51,6 @@ async def get_payment_info(token: str, order_id: str):
         response = await client.post(url, json=payload, headers=headers)
         if response.status_code == 200:
             data = response.json()
-            return data
+            return data['response']['status']
         else:
             return {"status": "error", "response": response.text}

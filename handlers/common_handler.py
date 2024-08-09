@@ -70,6 +70,12 @@ async def command_start_handler(message: types.Message, user_id: int = None, use
     await message.answer("Добро пожаловать в бота!", reply_markup=main_keyboard(is_admin))
 
 
+@router.message(Command("menu"))
+async def cmd_test1(message: types.Message):
+    is_admin = message.from_user.id in admins
+    await message.answer("🔝 Главное меню", reply_markup=main_keyboard(is_admin))
+
+
 @router.callback_query(F.data.startswith('check_subscription'))
 async def check_subscription(callback_query: CallbackQuery):
     user_id = int(callback_query.data.split(':')[2])
