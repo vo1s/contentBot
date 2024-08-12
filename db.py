@@ -2,7 +2,7 @@ from config import config
 from motor.motor_asyncio import AsyncIOMotorClient
 from typing import Literal
 from datetime import datetime
-
+from aiogram import Bot
 db = AsyncIOMotorClient(config.db.get_secret_value())[config.db_name.get_secret_value()]
 
 
@@ -65,17 +65,23 @@ async def update_subscription_status(user_id, status):
     await users_collection.update_one({"_id": user_id}, {"$set": {"subscription_status": status}})
 
 
-async def distribute_money_reffs(user_id: int, balance: int):
+async def distribute_money_reffs(user_id: int, balance: int, bot: Bot):
     users_collection = get_users_collection()
     user = await get_user_by_id(user_id)
     level_1_inviter = await get_user_by_id(user['reff_info']['reff_id'])
     if level_1_inviter is not None:  # НАЧИСЛЯЕМ БОНУС РЕФФЕРАЛУ ПЕРВОГО УРОВНЯ
-        bonus = int(balance * int(level_1_inviter['reff_info']['level_1_bonus']) / 50) # сумма_поплнения * %первого уровня * 2
-        await manage_balance(level_1_inviter['_id'], bonus, 'add')
+        bonus = int(
+            balance * int(level_1_inviter['reff_info']['level_1_bonus']) / 50)  # сумма_поплнения * %первого уровня * 2
+        await add_withdraw_balance(level_1_inviter['_id'], bonus)
+        await bot.send_message(level_1_inviter['_id'], f"Новый реферальный бонус! + <b>{bonus}</b> 💎")
+
+
         level_2_inviter = await get_user_by_id(level_1_inviter['reff_info']['reff_id'])
         if level_2_inviter is not None:  # НАЧИСЛЯЕМ БОНУС РЕФФЕРАЛУ ВТОРОГО УРОВНЯ
-            bonus = int(balance * int(level_2_inviter['reff_info']['level_2_bonus']) / 50) # сумма_поплнения * %второго уровня * 2
-            await manage_balance(level_2_inviter['_id'], bonus, 'add')
+            bonus = int(balance * int(
+                level_2_inviter['reff_info']['level_2_bonus']) / 50)  # сумма_поплнения * %второго уровня * 2
+            await add_withdraw_balance(level_2_inviter['_id'], bonus)
+            await bot.send_message(level_2_inviter['_id'], f"Новый реферальный бонус! + <b>{bonus}</b> 💎")
 
 
 async def manage_balance(user_id: int, balance: int, operation: Literal["add", "subtract"]):
@@ -97,6 +103,24 @@ async def manage_balance(user_id: int, balance: int, operation: Literal["add", "
         )
 
         return new_balance
+
+
+async def add_withdraw_balance(user_id: int, balance: int, set_to_null: bool = False):
+    users_collection = get_users_collection()
+    user = await get_user_by_id(user_id)
+    if not user:
+        raise ValueError("User not found")
+
+    new_balance = user['reff_info']['earned_by_deposit'] + balance
+    if set_to_null:
+        new_balance = 0
+
+    await users_collection.update_one(
+        {"_id": user_id},
+        {"$set": {"reff_info.earned_by_deposit": new_balance}}
+    )
+
+    return new_balance
 
 
 async def check_subscription(user_id: int) -> bool:

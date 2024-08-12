@@ -134,7 +134,7 @@ async def dice(message: types.Message, state: FSMContext, bot: Bot):
             await asyncio.sleep(3)
 
             if int(data['guess']) == msg.dice.value:  # Если кубик совпал с загаданным значением
-                new_balance = await manage_balance(message.from_user.id, bet * 2, 'add')
+                new_balance = await manage_balance(message.from_user.id, bet * 3, 'add')
                 await message.answer(f"Поздравлям, ваше число совпало с кубиком, баланс <b>{new_balance}</b>",
                                      parse_mode="html", reply_markup=back_casino_keyboard())
             else:  # если кубик не совпал с указанным значением

@@ -23,7 +23,7 @@ async def profile(message: types.Message):
 👤 Логин: {user['username']}
 📆 Дата регистрации: {user['registration_date'].strftime('%d-%m-%Y %H:%M')}
 ➖➖➖➖➖➖➖➖➖➖➖➖➖
-💸 Баланс: {user['balance']} 💎 Tokens
+💸 Баланс: {user['balance']} 💎
 👥 Приглашенные пользователи: {user['reff_info']['refs']}
 💰 Заработано за рефералов: {user['reff_info']['refs_bonus']} 💎
 ➖➖➖➖➖➖➖➖➖➖➖➖➖

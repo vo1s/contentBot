@@ -4,7 +4,7 @@ from aiogram.types import CallbackQuery, InlineKeyboardMarkup
 
 from api.crypto_bot_api import crypto_bot
 from config import config
-from db import get_user_by_id
+from db import get_user_by_id, add_withdraw_balance
 from keyboards.admin_keyboard import confirm_withdraw_keyboard_admin, get_money
 from keyboards.payment_keyboard import confirm_withdraw_keyboard, admin
 from states import Withdraw
@@ -16,7 +16,7 @@ router = Router()
 async def withdraw_main(call: CallbackQuery, state: FSMContext, bot: Bot):
     content = """"""
     user = await get_user_by_id(call.message.chat.id)
-    balance = user['balance']
+    balance = user['reff_info']['earned_by_deposit']
     if balance >= 400:
         content = f"""
 <i>Вывод осуществляется от <b>200 рублей</b> (2 💎 = 1 RUB) через CryptoBot в USDT</i>
@@ -95,14 +95,13 @@ async def confirm_withdraw(call: CallbackQuery, bot: Bot):
             amount_usdt = float(amount) / float(rate.rate)
             break
     check = await crypto_bot.create_check(asset='USDT', amount=round(amount_usdt, 2), pin_to_user_id=int(user_id))
-
     await bot.delete_message(
         chat_id=call.message.chat.id,
         message_id=call.message.message_id,
     )
 
     await bot.send_message(chat_id=user_id, text="Получите ваши средства!", reply_markup=get_money(check.bot_check_url))
-
+    await add_withdraw_balance(int(user_id), 0, True)
 
 @router.callback_query(F.data.startswith('admin_decline_withdraw'))
 async def confirm_withdraw(call: CallbackQuery, bot: Bot):

@@ -60,7 +60,7 @@ async def pay_sbp_check(call: CallbackQuery, bot: Bot):
     if result.lower() == 'accept':
         if amount == '299':
             await update_subscription_status(call.message.chat.id, 'paid')
-            await distribute_money_reffs(call.message.chat.id, int(amount))
+            await distribute_money_reffs(call.message.chat.id, int(amount), bot)
             await bot.edit_message_text(
                 text="Ваша подписка успешно оплачена! Поздравляю",
                 chat_id=call.message.chat.id,
@@ -69,7 +69,7 @@ async def pay_sbp_check(call: CallbackQuery, bot: Bot):
             )
         else:
             new_balance = await manage_balance(call.message.chat.id, int(amount) * 2, 'add')
-            await distribute_money_reffs(call.message.chat.id, int(amount))
+            await distribute_money_reffs(call.message.chat.id, int(amount), bot)
             await bot.edit_message_text(
                 text=f"Ваш баланс успешно пополнен! Баланс - <b>{new_balance} 💎</b>",
                 chat_id=call.message.chat.id,
@@ -124,7 +124,7 @@ async def check_crypto_bot_payment(call: CallbackQuery, bot: Bot):
     if invoice[0].status == 'paid':
         if rub_amount == '299':
             await update_subscription_status(call.message.chat.id, 'paid')
-            await distribute_money_reffs(call.message.chat.id, int(rub_amount))
+            await distribute_money_reffs(call.message.chat.id, int(rub_amount), bot)
             await bot.edit_message_text(
                 text="Ваша подписка успешно оплачена! Поздравляю",
                 chat_id=call.message.chat.id,
@@ -133,7 +133,7 @@ async def check_crypto_bot_payment(call: CallbackQuery, bot: Bot):
             )
         else:
             new_balance = await manage_balance(call.message.chat.id, int(rub_amount) * 2, 'add')
-            await distribute_money_reffs(call.message.chat.id, int(rub_amount))
+            await distribute_money_reffs(call.message.chat.id, int(rub_amount), bot)
             await bot.edit_message_text(
                 text=f"Ваш баланс успешно пополнен! Баланс - <b>{new_balance} 💎</b>",
                 chat_id=call.message.chat.id,
@@ -236,17 +236,17 @@ async def pre_checkout_handler(pre_checkout_query: PreCheckoutQuery):
 # -------------- НАЧИСЛЕНИЕ ДЕПОЗИТА ИЛИ ПОДПИСКИ ЧЕРЕЗ ЗВЕЗДЫ
 
 @router.message(F.successful_payment)
-async def on_successful_payment(message: types.Message):
+async def on_successful_payment(message: types.Message, bot: Bot):
     user_id = message.successful_payment.invoice_payload.split(":")[0]
     amount_rubles = message.successful_payment.invoice_payload.split(":")[1]
 
     if amount_rubles == '299':
         await update_subscription_status(message.chat.id, 'paid')
-        await distribute_money_reffs(message.chat.id, int(amount_rubles))
+        await distribute_money_reffs(message.chat.id, int(amount_rubles), bot)
         await message.answer("Ваша подписка оплачена! Поздравляю!")
     else:
         new_balance = await manage_balance(int(user_id), round(int(amount_rubles) * 2), 'add')
-        await distribute_money_reffs(message.chat.id, int(amount_rubles))
+        await distribute_money_reffs(message.chat.id, int(amount_rubles), bot)
         content = f"""
 <b>Огромное спасибо!</b>
 
